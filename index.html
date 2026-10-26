@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Aupha7sap/MeysSad9dSNIXgajq/SQoWV6eUP0d6sk8=' 'sha256-GtogTCapfEGSYT+zdFm0qKR1jYnBE3ZB8HQhl6QdzdI=' https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js; style-src 'unsafe-inline'; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Aupha7sap/MeysSad9dSNIXgajq/SQoWV6eUP0d6sk8=' 'sha256-luNGe31qOzsgeQVW1hbAaYPZI48c6sMDDJ9HDHi4kfw=' https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js; style-src 'unsafe-inline'; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
-<meta name="api-url" content="https://script.google.com/macros/s/AKfycbwDLYTrjVBbZRuOm5cWSJdq9N42QDzWWvfaPtlxdEOaiHxK0w9ohCQaIJdjlla6Cc3u/exec">
+<meta name="api-url" content="">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="ViCC 実写・アニメーション上映会の上映スケジュール、作品診断、感想投稿、スタンプラリー">
 <meta name="theme-color" content="#1f1b18">
@@ -337,9 +337,7 @@ function vStamp(){
  const st=[[S.quiz,'compass','診断'],[n>=1,'pen-line','感想1'],[n>=2,'pen-line','感想2'],[n>=3,'pen-line','感想3']];
  const all=st.every(s=>s[0]);
  $('v').innerHTML=`<div class="card"><h2>スタンプカード</h2><div class="stamps">${st.map(s=>`<div class="st ${s[0]?'on':''}">${I(s[0]?s[1]:'lock')}<small>${s[2]}</small></div>`).join('')}</div>
- ${all?`${celeb()}`:`<p class="sub" style="text-align:center">診断を1回して、別々の作品の感想を3つ書くとコンプリート！<br>（診断 ${S.quiz?1:0} / 1・感想 ${Math.min(n,3)} / 3）</p>`}</div>
- <button class="btn g" id="nx">${I('users')} 次の人へ（スタンプをリセット）</button>`;
- $('nx').onclick=()=>{if(confirm('スタンプと診断結果をリセットします。感想データは残ります。')){S.quiz=false;S.sid=(S.sid||1)+1;save();res=null;qi=0;tally={h:0,d:0,w:0,f:0};ok=false;tab='sch';render()}}}
+ ${all?`${celeb()}`:`<p class="sub" style="text-align:center">診断を1回して、別々の作品の感想を3つ書くとコンプリート！<br>（診断 ${S.quiz?1:0} / 1・感想 ${Math.min(n,3)} / 3）</p>`}</div>`}
 const TABS_OK=['sch','quiz','rev','rank','stamp'];
 (()=>{const t=location.hash.slice(1);if(TABS_OK.includes(t))tab=t;
  try{const u=JSON.parse(sessionStorage.getItem('vicc-ui')||'{}');if(u.day===0||u.day===1)day=u.day;if(u.rv==='new'||u.rv==='by')rv=u.rv}catch(e){}})();
