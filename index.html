@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Aupha7sap/MeysSad9dSNIXgajq/SQoWV6eUP0d6sk8=' 'sha256-3yXf4XHRQFuAHDKFP3YFHawq6fSAi1NOzum1JudiBWY=' https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js; style-src 'unsafe-inline'; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Aupha7sap/MeysSad9dSNIXgajq/SQoWV6eUP0d6sk8=' 'sha256-GtogTCapfEGSYT+zdFm0qKR1jYnBE3ZB8HQhl6QdzdI=' https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js; style-src 'unsafe-inline'; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
-<meta name="api-url" content="https://script.google.com/macros/s/AKfycbwDLYTrjVBbZRuOm5cWSJdq9N42QDzWWvfaPtlxdEOaiHxK0w9ohCQaIJdjlla6Cc3u/exec">
+<meta name="api-url" content="">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="ViCC 実写・アニメーション上映会の上映スケジュール、作品診断、感想投稿、スタンプラリー">
 <meta name="theme-color" content="#1f1b18">
@@ -202,10 +202,13 @@ const K='cinema-compass-v1';
 let S={reviews:[],quiz:false},tab='sch',qi=0,tally={h:0,d:0,w:0,f:0},res=null,draft={m:0,s:0,e:'',t:'',nm:''};
 try{const r=JSON.parse(localStorage.getItem(K)||'{}');
  if(r&&typeof r==='object'){
-  if(Array.isArray(r.reviews))S.reviews=r.reviews.filter(x=>x&&typeof x.m==='string'&&Number.isFinite(+x.s)).slice(0,500).map(x=>({id:typeof x.id==='string'?x.id.replace(/[^a-z0-9]/gi,'').slice(0,30):'',sy:x.sy?1:0,m:x.m.slice(0,80),s:Math.min(5,Math.max(1,Math.round(+x.s))),e:typeof x.e==='string'?x.e.slice(0,20):'',t:typeof x.t==='string'?x.t.slice(0,120):'',nm:typeof x.nm==='string'?x.nm.slice(0,12):'匿名',at:+x.at||0,sid:+x.sid||1}));
+  if(Array.isArray(r.reviews))S.reviews=r.reviews.filter(x=>x&&typeof x.m==='string').slice(0,500).map(x=>{
+   const b={id:typeof x.id==='string'?x.id.replace(/[^a-z0-9]/gi,'').slice(0,30):'',sy:x.sy?1:0,m:x.m.slice(0,80),at:+x.at||0,sid:+x.sid||1};
+   if(Number.isFinite(+x.s))Object.assign(b,{s:Math.min(5,Math.max(1,Math.round(+x.s))),e:typeof x.e==='string'?x.e.slice(0,20):'',t:typeof x.t==='string'?x.t.slice(0,120):'',nm:typeof x.nm==='string'?x.nm.slice(0,12):'匿名'});
+   return b});
   S.quiz=!!r.quiz;if(typeof r.pc==='string')S.pc=r.pc.slice(0,30);S.sid=Math.max(1,Math.round(+r.sid)||1);if(typeof r.dev==='string')S.dev=r.dev.replace(/[^a-z0-9]/gi,'').slice(0,30);
  }}catch(e){}
-const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(Object.assign({},S,{reviews:S.reviews.map(r=>API&&r.sy?{id:r.id,sy:1,m:r.m,at:r.at,sid:r.sid}:r)})))}catch(e){}};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=id=>document.getElementById(id);
 const TABS=[['sch','calendar-clock','上映日程'],['quiz','compass','診断'],['rev','pen-line','感想'],['rank','messages-square','みんなの<wbr>コメント'],['stamp','ticket','スタンプ']];
@@ -220,7 +223,7 @@ function thanks(done){
  if(im&&!matchMedia('(prefers-reduced-motion:reduce)').matches){tm=setInterval(()=>{i+=dir;if(i>=FR.length-1||i<=0)dir=-dir;im.src=FR[i]},90)}
  o.onclick=e=>{if(e.target===o||e.target.id==='thx'){clearInterval(tm);o.remove()}};
 }
-function render(){nav();({sch:vSch,quiz:vQuiz,rev:vRev,rank:vRank,stamp:vStamp})[tab]();try{lucide.createIcons()}catch(e){}startLoop()}
+function render(){nav();({sch:vSch,quiz:vQuiz,rev:vRev,rank:vRank,stamp:vStamp})[tab]();try{lucide.createIcons()}catch(e){}try{history.replaceState(null,'','#'+tab);sessionStorage.setItem('vicc-ui',JSON.stringify({day,rv}))}catch(e){}startLoop()}
 function vQuiz(){
  if(!ok){$('v').innerHTML=`<div class="card"><h2>${I('triangle-alert')} 診断を始める前に</h2><p>この診断機能は、あなたにぴったりの作品を紹介する機能です。<br>ただし、この機能の性質上、作品のネタバレを含む場合があります。</p><button class="btn" id="agree">了解して診断する</button> <button class="btn g" id="bk">上映日程にもどる</button></div>`;$('agree').onclick=()=>{ok=true;render()};$('bk').onclick=()=>{tab='sch';render()};return}
  if(res){const[a,b]=res;$('v').innerHTML=`<div class="card" style="text-align:center"><p class="sub">あなたにぴったりの映画は…</p><h2>${esc(a.n)}</h2><p class="ds">${esc(a.d)}</p><p class="cm">${dm(a.m)} ／ ${esc(a.by)}${a.by.startsWith('Team')?'（今年度入会の新メンバーの作品）':''}<br>上映の目安：${when(MOVIES.indexOf(a))}<br>観たいときは会場の部員に声をかけてね</p><p class="cm">2番手のおすすめ：${esc(b.n)}</p><button class="btn" id="go">${I('pen-line')} 観終わったら感想を書く</button> <button class="btn g" id="re">${I('rotate-ccw')} もう一度</button></div>`;
@@ -237,7 +240,7 @@ function vRev(){
  <label class="sub">この映画を一言で表すと？</label><div class="emo" id="em">${EMO.map(e=>`<button data-e="${e[0]}" class="${d.e===e[0]?'on':''}">${I(e[0])}<span>${e[1]}</span></button>`).join('')}</div>
  <label class="sub">ひとこと感想</label><textarea id="t" rows="3" maxlength="120" placeholder="120字まで">${esc(d.t)}</textarea>
  <label class="sub">ニックネーム（任意）</label><input id="nm" maxlength="12" value="${esc(d.nm)}">
- ${API&&NP?`<label class="sub">合言葉（会場で伝えます）</label><input id="pc" autocomplete="off" autocapitalize="off" maxlength="30" value="${esc(S.pc||'')}"><p class="cm">合言葉は、会場に来た人にだけ伝えています。</p>`:''}<p class="cm">${I('info')} 投稿した感想とニックネームは、来場者のみなさんに公開されます。個人情報は書かないでください。</p><button class="btn" id="ok">${I('send')} 投稿する</button> <span id="msg" class="cm"></span></div>`;
+ ${API?`<label class="sub">合言葉（会場で伝えます）</label><input id="pc" autocomplete="off" autocapitalize="off" maxlength="30" value="${esc(S.pc||'')}"><p class="cm">合言葉は、会場に来た人にだけ伝えています。</p>`:''}<p class="cm">${I('info')} 投稿した感想とニックネームは、来場者のみなさんに公開されます。個人情報は書かないでください。</p><button class="btn" id="ok">${I('send')} 投稿する</button> <span id="msg" class="cm"></span></div>`;
  $('m').onchange=e=>d.m=+e.target.value;$('t').oninput=e=>d.t=e.target.value;$('nm').oninput=e=>d.nm=e.target.value;
  $('st').querySelectorAll('button').forEach(b=>b.onclick=()=>{d.s=+b.dataset.i;render()});
  $('em').querySelectorAll('button').forEach(b=>b.onclick=()=>{d.e=b.dataset.e;render()});
@@ -245,9 +248,9 @@ function vRev(){
   const msg=t=>{$('msg').textContent=t};
   if(!d.s){msg('星を選んでね');return}
   const rr={id:uid(),sy:0,m:MOVIES[d.m].n,s:d.s,e:d.e,t:d.t.trim(),nm:d.nm.trim()||'匿名',at:Date.now(),sid:sid()};
-  if(API&&NP){
+  if(API){
    const pc=($('pc')||{value:''}).value.trim();
-   if(!pc){msg('合言葉を入れてください（会場で伝えます）');return}
+   if(!pc&&NP){msg('合言葉を入れてください（会場で伝えます）');return}
    $('ok').disabled=true;msg('送信中…');
    S.pc=pc;const x=await post(rr,pc);
    if($('ok'))$('ok').disabled=false;
@@ -263,7 +266,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 if(!S.dev)S.dev=uid();
 S.reviews.forEach(r=>{if(!r.id){r.id=uid();r.sy=1}});save();
 let NP=true,R=[],SYN=API?'読み込み中…':'共有は未設定です（この端末の中だけに保存されます）';
-const ALL=()=>{const ids=new Set(R.map(r=>r.id));return R.concat(S.reviews.filter(r=>!ids.has(r.id))).sort((a,b)=>a.at-b.at)};
+const ALL=()=>{const ids=new Set(R.map(r=>r.id));return R.concat(S.reviews.filter(r=>!ids.has(r.id)&&r.s!==undefined)).sort((a,b)=>a.at-b.at)};
 let FL=0;
 async function post(r,pc){
  try{
@@ -337,6 +340,10 @@ function vStamp(){
  ${all?`${celeb()}`:`<p class="sub" style="text-align:center">診断を1回して、別々の作品の感想を3つ書くとコンプリート！<br>（診断 ${S.quiz?1:0} / 1・感想 ${Math.min(n,3)} / 3）</p>`}</div>
  <button class="btn g" id="nx">${I('users')} 次の人へ（スタンプをリセット）</button>`;
  $('nx').onclick=()=>{if(confirm('スタンプと診断結果をリセットします。感想データは残ります。')){S.quiz=false;S.sid=(S.sid||1)+1;save();res=null;qi=0;tally={h:0,d:0,w:0,f:0};ok=false;tab='sch';render()}}}
+const TABS_OK=['sch','quiz','rev','rank','stamp'];
+(()=>{const t=location.hash.slice(1);if(TABS_OK.includes(t))tab=t;
+ try{const u=JSON.parse(sessionStorage.getItem('vicc-ui')||'{}');if(u.day===0||u.day===1)day=u.day;if(u.rv==='new'||u.rv==='by')rv=u.rv}catch(e){}})();
+addEventListener('hashchange',()=>{const t=location.hash.slice(1);if(TABS_OK.includes(t)&&t!==tab){tab=t;render()}});
 render();flush();setInterval(()=>{S.reviews.some(x=>!x.sy)?flush():(tab==='rank'&&loadRemote())},30000);
 </script>
 </body>
