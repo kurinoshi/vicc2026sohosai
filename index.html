@@ -238,7 +238,7 @@ function vRev(){
   S.reviews.push({id:uid(),sy:0,m:MOVIES[d.m].n,s:d.s,e:d.e,t:d.t.trim(),nm:d.nm.trim()||'匿名',at:Date.now(),sid:sid()});save();flush();
   draft={m:d.m,s:0,e:'',t:'',nm:''};tab='stamp';render();thanks(S.quiz&&cnt()===3&&S.reviews.filter(r=>r.sid===sid()&&r.m===MOVIES[d.m].n).length===1)}}
 function sid(){return S.sid||(S.sid=1),S.sid}
-const API='';// ★Apps ScriptのウェブアプリURLをここに貼ると、感想が全員で共有されます
+const API='https://script.google.com/macros/s/AKfycbxQ2ETPjMNAjSWcqgAvn9f1ZkmBr22EhnOQyv82aBktAY9FXXsLtEnZWlK-r8FFoEE/exec';// ★Apps ScriptのウェブアプリURLをここに貼ると、感想が全員で共有されます
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 if(!S.dev)S.dev=uid();
 S.reviews.forEach(r=>{if(!r.id){r.id=uid();r.sy=1}});save();
